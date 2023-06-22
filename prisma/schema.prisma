@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// model User {
+//   userId        Int      @id @default(autoincrement())
+//   name          String
+//   email         String   @unique
+//   password      String
+//   bets          Bet[] // User has multiple bets
+//   userCreatedAt DateTime @default(now())
+//   wallet        Float    @default(0)
+
+//   @@map("users")
+// }
+
+model Game {
+  gameId        Int      @id @default(autoincrement())
+  teamA         String
+  teamB         String
+  startDateTime DateTime
+  endDateTime   DateTime
+  oddsA         Float
+  oddsDraw      Float
+  oddsB         Float
+  scoreA        Int?
+  scoreB        Int?
+  gameStatus    Boolean? @default(true)
+  bets          Bet[] // Game has multiple bets
+
+  @@unique([teamA, startDateTime])
+  @@map("games")
+}
+
+model Bet {
+  betId        Int       @id @default(autoincrement())
+  teamBet      String
+  amountBet    Float
+  oddsValue    Float
+  gameId       Int
+  game         Game      @relation(fields: [gameId], references: [gameId])
+  userEmail    String    @map("userEmail")
+  user         User?     @relation(fields: [userEmail], references: [email])
+  betStatus    Boolean?  @default(true)
+  betCreatedAt DateTime? @default(now())
+  betResult    Boolean?  @default(false)
+
+  @@map("bets")
+}
+
+model User {
+  email  String @id
+  wallet Int?   @default(1000)
+  Bet    Bet[]
+}
